@@ -130,7 +130,7 @@ with tab1:
         st.subheader("📂 Upload Resume")
         uploaded_file = st.file_uploader("Upload your CV", type=["pdf", "docx"], key="cv_single")
 
-    if st.button("Analyze Resume with AI 🚀"):
+    if st.button("Analyze Resume"):
         if uploaded_file and jd_input.strip():
             if not api_key:
                 st.error("⚠️ Please check your API Key setup!")
@@ -156,27 +156,27 @@ with tab1:
                     st.write(", ".join(missing_keywords[:15]) if missing_keywords else "No major missing keywords found!")
                     
                     st.write("---")
-                    st.header("🤖 Advanced AI Feedback")
+                    st.header("🤖 Advanced Feedback")
                     try:
                         ai_feedback = get_ai_feedback(resume_text, jd_input, model)
                         st.write(ai_feedback)
-                        st.download_button("📥 Download AI Feedback Report", data=ai_feedback, file_name="AI_HR_Review.txt", mime="text/plain")
+                        st.download_button("📥 Download Feedback Report", data=ai_feedback, file_name="AI_HR_Review.txt", mime="text/plain")
                     except Exception as e:
-                        st.info("📌 The AI server is busy. Your ATS Score above is 100% accurate.")
+                        st.info("Server is busy now. Your ATS Score above is 100% accurate. Please wait a while")
         else:
             st.error("Please upload a resume and provide the Job Description.")
 
     st.write("---")
     if st.button("✍️ Generate Custom Cover Letter"):
         if 'resume_text' in st.session_state:
-            with st.spinner("AI is writing a perfect cover letter..."):
+            with st.spinner("Writing a perfect cover letter for you..."):
                 try:
                     cover_letter = generate_cover_letter(st.session_state['resume_text'], st.session_state['jd_input'], st.session_state['ai_model'])
                     st.subheader("✉️ Your Customized Cover Letter")
                     st.write(cover_letter)
                     st.download_button(label="📥 Download Cover Letter", data=cover_letter, file_name="Cover_Letter.txt", mime="text/plain")
                 except:
-                    st.error("AI is busy. Please try again.")
+                    st.error("Server is busy. Please try again.")
         else:
             st.warning("Please analyze your resume first!")
 
