@@ -4,3 +4,5 @@ scikit-learn
 google-generativeai
 docx2txt
 pandas
+requests
+beautifulsoup4
