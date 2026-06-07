@@ -12,7 +12,7 @@ import time
 st.set_page_config(page_title="AI Resume Screener", page_icon="📄", layout="wide")
 
 st.title("📄 AI-Driven Resume Screener & ATS System")
-st.write("Evaluate resumes, generate cover letters, and rank multiple candidates instantly!")
+st.write("Evaluate resumes, generate cover letters, and rank top candidates instantly!")
 st.write("---")
 
 # Streamlit Secrets থেকে API Key নেওয়া
@@ -84,7 +84,7 @@ with tab1:
     with col2:
         uploaded_file = st.file_uploader("Upload your CV", type=["pdf", "docx"], key="cv_single")
 
-    if st.button("Analyze Resume with AI 🚀"):
+    if st.button("Analyze Resume"):
         if uploaded_file and jd_input.strip():
             if not api_key:
                 st.error("⚠️ Please check your API Key setup!")
