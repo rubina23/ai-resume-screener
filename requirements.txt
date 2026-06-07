@@ -3,3 +3,4 @@ PyPDF2
 scikit-learn
 google-generativeai
 docx2txt
+pandas
