@@ -1,18 +1,17 @@
-# %%writefile app.py
 import streamlit as st
 import PyPDF2
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import re
 
-# ওয়েবসাইটের সেটিং
+# Settings
 st.set_page_config(page_title="AI Resume Screener", page_icon="📄", layout="wide")
 
 st.title("📄 AI Resume Screener (ATS System)")
 st.write("Upload your resume and the Job Description to see your ATS Match Score!")
 st.write("---")
 
-# ১. পিডিএফ থেকে টেক্সট পড়ার ফাংশন
+# 1. Read text from PDF
 def extract_text_from_pdf(uploaded_file):
     pdf_reader = PyPDF2.PdfReader(uploaded_file)
     text = ""
@@ -20,7 +19,7 @@ def extract_text_from_pdf(uploaded_file):
         text += pdf_reader.pages[page].extract_text()
     return text
 
-# ২. ATS Score বের করার ফাংশন (TF-IDF & Cosine Similarity)
+# 2. Find ATS Score (TF-IDF & Cosine Similarity)
 def calculate_match_score(resume_text, jd_text):
     text_list = [resume_text, jd_text]
     cv = TfidfVectorizer()
@@ -28,17 +27,17 @@ def calculate_match_score(resume_text, jd_text):
     match_percentage = cosine_similarity(count_matrix)[0][1] * 100
     return round(match_percentage, 2)
 
-# ৩. মিসিং কি-ওয়ার্ড বের করার ফাংশন
+# 3. Find missing keyword 
 def get_missing_keywords(resume_text, jd_text):
-    # টেক্সট থেকে শুধু শব্দগুলো (৩ অক্ষরের বড়) আলাদা করা
+    # tokenize words 
     resume_words = set(re.findall(r'\b[a-zA-Z]{4,}\b', resume_text.lower()))
     jd_words = set(re.findall(r'\b[a-zA-Z]{4,}\b', jd_text.lower()))
     
-    # জব ডেসক্রিপশনে আছে কিন্তু সিভিতে নেই এমন শব্দগুলো বের করা
+    # find word missing on the cv 
     missing = jd_words - resume_words
     return list(missing)
 
-# ইউজার ইন্টারফেস (UI)
+# user Input (UI)
 col1, col2 = st.columns(2)
 
 with col1:
@@ -52,20 +51,20 @@ with col2:
 if st.button("Analyze Resume 🚀"):
     if uploaded_file is not None and jd_input.strip() != "":
         with st.spinner("Analyzing your resume..."):
-            # টেক্সট এক্সট্রাক্ট করা
+            # Extract text
             resume_text = extract_text_from_pdf(uploaded_file)
             
-            # স্কোর ক্যালকুলেট করা
+            # Calculate score স্
             match_score = calculate_match_score(resume_text, jd_input)
             
-            # মিসিং কি-ওয়ার্ড বের করা
+            # find missing words
             missing_keywords = get_missing_keywords(resume_text, jd_input)
             
-            # রেজাল্ট দেখানো
+            # result
             st.write("---")
             st.header("📊 ATS Analysis Result")
             
-            # স্কোরের ওপর ভিত্তি করে কালার এবং মেসেজ
+            #  message & color 
             if match_score >= 80:
                 st.success(f"### 🎉 Match Score: {match_score}% (Excellent Fit!)")
             elif match_score >= 60:
@@ -75,10 +74,10 @@ if st.button("Analyze Resume 🚀"):
                 
             st.progress(match_score / 100)
             
-            # মিসিং কি-ওয়ার্ড দেখানো
+            # show missing keyword 
             st.subheader("🔍 Keywords to Add in Your CV:")
             if len(missing_keywords) > 0:
-                # প্রথম ২০টি গুরুত্বপূর্ণ মিসিং শব্দ দেখাবো
+                # shown first 20 important missing word 
                 st.write(", ".join(missing_keywords[:20]))
                 st.info("💡 Pro Tip: Add some of these keywords to your resume to increase your ATS score!")
             else:
