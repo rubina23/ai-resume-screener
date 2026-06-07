@@ -43,7 +43,8 @@ def get_missing_keywords(resume_text, jd_text):
 # ফাংশন: Gemini AI দিয়ে ডিটেইলস ফিডব্যাক জেনারেট করা
 def get_ai_feedback(resume_text, jd_text, api_key):
     genai.configure(api_key=api_key)
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    # model = genai.GenerativeModel('gemini-1.5-flash')
+    model = genai.GenerativeModel('gemini-pro')
     prompt = f"""
     Act as an expert HR Manager and ATS specialist. Review the following Resume against the Job Description.
     Job Description: {jd_text}
