@@ -4,6 +4,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import re
 import google.generativeai as genai
+import time
 
 # ওয়েবসাইটের সেটিং
 st.set_page_config(page_title="AI Resume Screener", page_icon="📄", layout="wide")
@@ -12,12 +13,7 @@ st.title("📄 AI Resume Screener & Smart Feedback System")
 st.write("Upload your resume, paste the Job Description, and get detailed AI feedback powered by Gemini!")
 st.write("---")
 
-# সাইডবারে API Key নেওয়ার অপশন
-#st.sidebar.title("🔑 API Key Setup")
-#api_key = st.sidebar.text_input("Enter your Google Gemini API Key:", type="password")
-#st.sidebar.markdown("[Get your free API key here](https://aistudio.google.com/app/apikey)")
-
-# Streamlit Secrets থেকে স্বয়ংক্রিয়ভাবে API Key নেওয়া
+# Streamlit Secrets থেকে স্বয়ংক্রিয়ভাবে API Key নেওয়ার চেষ্টা
 try:
     api_key = st.secrets["GEMINI_API_KEY"]
 except:
@@ -25,7 +21,7 @@ except:
     api_key = st.sidebar.text_input("Enter your Google Gemini API Key:", type="password")
     st.sidebar.markdown("[Get your free API key here](https://aistudio.google.com/app/apikey)")
 
-# ফাংশন: পিডিএফ থেকে টেক্সট পড়া
+# ফাংশন ১: পিডিএফ থেকে টেক্সট পড়া
 def extract_text_from_pdf(uploaded_file):
     pdf_reader = PyPDF2.PdfReader(uploaded_file)
     text = ""
@@ -33,7 +29,7 @@ def extract_text_from_pdf(uploaded_file):
         text += pdf_reader.pages[page].extract_text()
     return text
 
-# ফাংশন: ATS Score বের করা
+# ফাংশন ২: ATS Score বের করা (TF-IDF & Cosine Similarity)
 def calculate_match_score(resume_text, jd_text):
     text_list = [resume_text, jd_text]
     cv = TfidfVectorizer()
@@ -41,15 +37,14 @@ def calculate_match_score(resume_text, jd_text):
     match_percentage = cosine_similarity(count_matrix)[0][1] * 100
     return round(match_percentage, 2)
 
-# ফাংশন: মিসিং কি-ওয়ার্ড বের করা
+# ফাংশন ৩: মিসিং কি-ওয়ার্ড বের করা
 def get_missing_keywords(resume_text, jd_text):
     resume_words = set(re.findall(r'\b[a-zA-Z]{4,}\b', resume_text.lower()))
     jd_words = set(re.findall(r'\b[a-zA-Z]{4,}\b', jd_text.lower()))
     missing = jd_words - resume_words
     return list(missing)
 
-# ফাংশন: Gemini AI দিয়ে ডিটেইলস ফিডব্যাক জেনারেট করা
-# ফাংশন: Gemini AI দিয়ে ডিটেইলস ফিডব্যাক জেনারেট করা
+# ফাংশন ৪: Gemini AI দিয়ে ডিটেইলস ফিডব্যাক জেনারেট করা
 def get_ai_feedback(resume_text, jd_text, api_key):
     genai.configure(api_key=api_key)
     
@@ -67,8 +62,7 @@ def get_ai_feedback(resume_text, jd_text, api_key):
                 valid_model = m.name.replace('models/', '') 
                 break
                 
-    import time
-    time.sleep(2)  # সেফটির জন্য ২ সেকেন্ড অপেক্ষা
+    time.sleep(2)  # সেফটির জন্য ২ সেকেন্ড অপেক্ষা (Rate limit বা কোটা এরর এড়ানোর জন্য)
     
     model = genai.GenerativeModel(valid_model)
     prompt = f"""
@@ -82,8 +76,6 @@ def get_ai_feedback(resume_text, jd_text, api_key):
     3. Weaknesses (What is missing or needs improvement).
     4. Actionable tips to improve the resume for this specific job role.
     """
-    response = model.generate_content(prompt)
-    return response.text
     response = model.generate_content(prompt)
     return response.text
 
@@ -100,7 +92,7 @@ with col2:
 
 if st.button("Analyze Resume with AI 🚀"):
     if uploaded_file is not None and jd_input.strip() != "":
-        if api_key == "":
+        if not api_key:
             st.error("⚠️ Please enter your Gemini API Key in the sidebar first!")
         else:
             with st.spinner("Analyzing your resume and generating AI feedback..."):
@@ -111,7 +103,7 @@ if st.button("Analyze Resume with AI 🚀"):
                 st.write("---")
                 st.header("📊 ATS Analysis Result")
                 
-                # স্কোর দেখানো
+                # স্কোরের ওপর ভিত্তি করে কালার এবং মেসেজ
                 if match_score >= 80:
                     st.success(f"### 🎉 Match Score: {match_score}% (Excellent Fit!)")
                 elif match_score >= 60:
@@ -126,7 +118,7 @@ if st.button("Analyze Resume with AI 🚀"):
                 if len(missing_keywords) > 0:
                     st.write(", ".join(missing_keywords[:15]))
                 else:
-                    st.success("Your resume covers almost all the keywords from the Job Description.")
+                    st.success("Wow! Your resume covers almost all the keywords from the Job Description.")
                 
                 st.write("---")
                 
@@ -136,9 +128,9 @@ if st.button("Analyze Resume with AI 🚀"):
                     ai_feedback = get_ai_feedback(resume_text, jd_input, api_key)
                     st.write(ai_feedback)
                 except Exception as e:
-                    st.error(f"Error generating AI feedback. Please check your API key. ({e})")
+                    st.error(f"Error generating AI feedback. Please check your API limit or connection. ({e})")
     else:
         st.error("Please upload a PDF resume and paste the Job Description to proceed.")
 
 st.write("---")
-#st.caption("🚀 AI-Powered ATS Analyzer | Built by You 💡")
+st.caption("🚀 AI-Powered ATS Analyzer | Built by You 💡")
