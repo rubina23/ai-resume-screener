@@ -1,5 +1,6 @@
 import streamlit as st
 import PyPDF2
+import docx2txt
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import re
@@ -9,8 +10,8 @@ import time
 # ওয়েবসাইটের সেটিং
 st.set_page_config(page_title="AI Resume Screener", page_icon="📄", layout="wide")
 
-st.title("📄 AI Resume Screener & Smart Feedback System")
-st.write("Upload your resume, paste the Job Description, and get detailed feedback!")
+st.title("📄 AI-Driven Resume Screener & Smart Feedback")
+st.write("Upload your resume, paste the Job Description, and get detailed AI feedback powered by Generative AI!")
 st.write("---")
 
 # Streamlit Secrets থেকে স্বয়ংক্রিয়ভাবে API Key নেওয়ার চেষ্টা
@@ -21,15 +22,18 @@ except:
     api_key = st.sidebar.text_input("Enter your Google Gemini API Key:", type="password")
     st.sidebar.markdown("[Get your free API key here](https://aistudio.google.com/app/apikey)")
 
-# ফাংশন ১: পিডিএফ থেকে টেক্সট পড়া
-def extract_text_from_pdf(uploaded_file):
-    pdf_reader = PyPDF2.PdfReader(uploaded_file)
+# ফাংশন ১: PDF এবং DOCX থেকে টেক্সট পড়া (নতুন আপডেট)
+def extract_text_from_file(uploaded_file):
     text = ""
-    for page in range(len(pdf_reader.pages)):
-        text += pdf_reader.pages[page].extract_text()
+    if uploaded_file.name.endswith('.pdf'):
+        pdf_reader = PyPDF2.PdfReader(uploaded_file)
+        for page in range(len(pdf_reader.pages)):
+            text += pdf_reader.pages[page].extract_text()
+    elif uploaded_file.name.endswith('.docx'):
+        text = docx2txt.process(uploaded_file)
     return text
 
-# ফাংশন ২: ATS Score বের করা (TF-IDF & Cosine Similarity)
+# ফাংশন ২: ATS Score বের করা
 def calculate_match_score(resume_text, jd_text):
     text_list = [resume_text, jd_text]
     cv = TfidfVectorizer()
@@ -44,40 +48,42 @@ def get_missing_keywords(resume_text, jd_text):
     missing = jd_words - resume_words
     return list(missing)
 
-# ফাংশন ৪: Gemini AI দিয়ে ডিটেইলস ফিডব্যাক জেনারেট করা
-def get_ai_feedback(resume_text, jd_text, api_key):
+# ফাংশন ৪: এআই মডেল সেটআপ করা (Rate limit safety)
+def get_gemini_model(api_key):
     genai.configure(api_key=api_key)
-    
-    # প্রথমে 1.5-flash খুঁজে বের করার চেষ্টা করবে
     valid_model = None
     for m in genai.list_models():
         if 'generateContent' in m.supported_generation_methods and '1.5-flash' in m.name.lower():
             valid_model = m.name.replace('models/', '') 
             break
-            
-    # যদি কোনো কারণে 1.5-flash না পায়, তবে অন্য যেকোনো এভেইলেবল মডেল নিবে
     if not valid_model:
         for m in genai.list_models():
             if 'generateContent' in m.supported_generation_methods and 'gemini' in m.name.lower():
                 valid_model = m.name.replace('models/', '') 
                 break
-                
-    time.sleep(2)  # সেফটির জন্য ২ সেকেন্ড অপেক্ষা (Rate limit এড়ানোর জন্য)
-    
-    model = genai.GenerativeModel(valid_model)
+    return genai.GenerativeModel(valid_model)
+
+# ফাংশন ৫: AI HR Feedback জেনারেট করা
+def get_ai_feedback(resume_text, jd_text, model):
+    time.sleep(2)  
     prompt = f"""
-    Act as an expert HR Manager and ATS specialist. Review the following Resume against the Job Description.
+    Act as an expert HR Manager. Review this Resume against the Job Description.
     Job Description: {jd_text}
     Resume: {resume_text}
-    
-    Please provide:
-    1. Candidate Profile Summary (2-3 lines).
-    2. Strengths (What matches well with the JD).
-    3. Weaknesses (What is missing or needs improvement).
-    4. Actionable tips to improve the resume for this specific job role.
+    Provide: 1. Candidate Summary, 2. Strengths, 3. Weaknesses, 4. Actionable tips.
     """
-    response = model.generate_content(prompt)
-    return response.text
+    return model.generate_content(prompt).text
+
+# ফাংশন ৬: AI Cover Letter জেনারেট করা (নতুন ফিচার)
+def generate_cover_letter(resume_text, jd_text, model):
+    time.sleep(2)
+    prompt = f"""
+    Act as an expert career coach. Write a highly professional, engaging, and customized Cover Letter for the following job using the candidate's resume.
+    Job Description: {jd_text}
+    Resume: {resume_text}
+    Make sure the tone is confident and matches the job requirements perfectly. Keep it under 400 words.
+    """
+    return model.generate_content(prompt).text
 
 # ইউজার ইন্টারফেস (UI)
 col1, col2 = st.columns(2)
@@ -88,22 +94,28 @@ with col1:
 
 with col2:
     st.subheader("📂 Upload Resume")
-    uploaded_file = st.file_uploader("Upload your CV (PDF format only)", type=["pdf"])
+    # এখন PDF এর পাশাপাশি DOCX ও সাপোর্ট করবে
+    uploaded_file = st.file_uploader("Upload your CV", type=["pdf", "docx"])
 
-if st.button("Analyze Resume"):
+if st.button("Analyze Resume with AI 🚀"):
     if uploaded_file is not None and jd_input.strip() != "":
         if not api_key:
-            st.error("⚠️ Please enter your Gemini API Key in the sidebar first!")
+            st.error("⚠️ Please check your API Key setup!")
         else:
-            with st.spinner("Analyzing your resume and generating feedback..."):
-                resume_text = extract_text_from_pdf(uploaded_file)
+            with st.spinner("Analyzing your resume and extracting insights..."):
+                # টেক্সট এক্সট্রাক্ট
+                resume_text = extract_text_from_file(uploaded_file)
+                st.session_state['resume_text'] = resume_text  # কভার লেটারের জন্য ডাটা সেভ রাখা
+                st.session_state['jd_input'] = jd_input
+                
                 match_score = calculate_match_score(resume_text, jd_input)
                 missing_keywords = get_missing_keywords(resume_text, jd_input)
+                model = get_gemini_model(api_key)
+                st.session_state['ai_model'] = model # মডেল সেভ রাখা
                 
                 st.write("---")
                 st.header("📊 ATS Analysis Result")
                 
-                # স্কোরের ওপর ভিত্তি করে কালার এবং মেসেজ
                 if match_score >= 80:
                     st.success(f"### 🎉 Match Score: {match_score}% (Excellent Fit!)")
                 elif match_score >= 60:
@@ -113,7 +125,6 @@ if st.button("Analyze Resume"):
                     
                 st.progress(match_score / 100)
                 
-                # মিসিং কি-ওয়ার্ড
                 st.subheader("🔍 Missing Keywords:")
                 if len(missing_keywords) > 0:
                     st.write(", ".join(missing_keywords[:15]))
@@ -121,18 +132,32 @@ if st.button("Analyze Resume"):
                     st.success("Wow! Your resume covers almost all the keywords from the Job Description.")
                 
                 st.write("---")
-                
-                # জেমিনাই এআই এর ফিডব্যাক
-                st.header("🤖 Advanced Feedback (HR Review)")
+                st.header("🤖 Advanced AI Feedback (HR Review)")
                 try:
-                    # যদি API ঠিক থাকে, তবে রেজাল্ট দেখাবে
-                    ai_feedback = get_ai_feedback(resume_text, jd_input, api_key)
+                    ai_feedback = get_ai_feedback(resume_text, jd_input, model)
                     st.write(ai_feedback)
                 except Exception as e:
-                    # যদি API লিমিট শেষ হয়ে যায়, তবে স্মার্ট মেসেজ দেখাবে
-                    st.info("📌 The server is currently experiencing high traffic or the free API limit has been reached. Don't worry! Your ATS Score and Missing Keywords above are 100% accurate. Please try the review feature again a little later.")
+                    st.info("📌 The AI server is currently experiencing high traffic. ATS Score is 100% accurate. Try the AI review later.")
+                    
+                st.success("Analysis Complete! You can now generate a custom Cover Letter.")
     else:
-        st.error("Please upload a PDF resume and paste the Job Description to proceed.")
+        st.error("Please upload a PDF/DOCX resume and paste the Job Description to proceed.")
+
+# নতুন বাটন: কভার লেটার জেনারেট করা
+st.write("---")
+if st.button("✍️ Generate Custom Cover Letter"):
+    if 'resume_text' in st.session_state and 'jd_input' in st.session_state:
+        with st.spinner("AI is writing a perfect cover letter for you..."):
+            try:
+                cover_letter = generate_cover_letter(st.session_state['resume_text'], st.session_state['jd_input'], st.session_state['ai_model'])
+                st.subheader("✉️ Your Customized Cover Letter")
+                st.write(cover_letter)
+                # ডাউনলোড করার অপশন
+                st.download_button(label="📥 Download Cover Letter (Text)", data=cover_letter, file_name="Cover_Letter.txt", mime="text/plain")
+            except Exception as e:
+                st.error("AI is currently busy. Please try again.")
+    else:
+        st.warning("Please analyze your resume first before generating a cover letter.")
 
 st.write("---")
-st.caption("Developed by Rubina Begum")
+st.caption("🚀 AI-Driven ATS Analyzer | Built by You 💡")
