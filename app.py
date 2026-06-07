@@ -43,8 +43,23 @@ def get_missing_keywords(resume_text, jd_text):
 # ফাংশন: Gemini AI দিয়ে ডিটেইলস ফিডব্যাক জেনারেট করা
 def get_ai_feedback(resume_text, jd_text, api_key):
     genai.configure(api_key=api_key)
-    # model = genai.GenerativeModel('gemini-1.5-flash')
-    model = genai.GenerativeModel('gemini-pro')
+    # ফাংশন: Gemini AI দিয়ে ডিটেইলস ফিডব্যাক জেনারেট করা
+def get_ai_feedback(resume_text, jd_text, api_key):
+    genai.configure(api_key=api_key)
+    
+    # স্বয়ংক্রিয়ভাবে অ্যাকটিভ মডেল খুঁজে বের করা
+    valid_model = None
+    for m in genai.list_models():
+        if 'generateContent' in m.supported_generation_methods and 'gemini' in m.name.lower():
+            # 'models/' অংশটুকু বাদ দিয়ে শুধু নাম নেওয়া
+            valid_model = m.name.replace('models/', '') 
+            break
+            
+    if not valid_model:
+        return "Error: No supported Gemini model found for your API key."
+        
+    # খুঁজে পাওয়া মডেলটি ব্যবহার করা
+    model = genai.GenerativeModel(valid_model)
     prompt = f"""
     Act as an expert HR Manager and ATS specialist. Review the following Resume against the Job Description.
     Job Description: {jd_text}
@@ -56,6 +71,8 @@ def get_ai_feedback(resume_text, jd_text, api_key):
     3. Weaknesses (What is missing or needs improvement).
     4. Actionable tips to improve the resume for this specific job role.
     """
+    response = model.generate_content(prompt)
+    return response.text
     response = model.generate_content(prompt)
     return response.text
 
