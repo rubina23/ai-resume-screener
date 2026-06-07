@@ -87,4 +87,4 @@ if st.button("Analyze Resume 🚀"):
         st.error("Please upload a PDF resume and paste the Job Description to proceed.")
 
 st.write("---")
-st.caption("🚀 Built with ❤️ using Streamlit, PyPDF2 & Scikit-Learn | AI Resume Screener")
+st.caption("Developed by Rubina Begum | Powered by Streamlit & NLP")
