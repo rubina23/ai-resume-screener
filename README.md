@@ -1,10 +1,10 @@
-# 📄 AI-Driven Resume Screener & Smart Feedback System (ATS System) 
+# 📄 Resume Screener & Smart Feedback System (ATS System) 
 
 ![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)
 ![Streamlit](https://img.shields.io/badge/Streamlit-App-FF4B4B.svg)
 ![Machine Learning](https://img.shields.io/badge/Machine%20Learning-Scikit--Learn-F9AB00.svg)
 
-An advanced Generative AI-backed Applicant Tracking System (ATS) built with Python, Streamlit, and Google Gemini AI. This application evaluates resumes against specific Job Descriptions, calculates a match score, identifies missing keywords, and provides comprehensive HR-level feedback using Large Language Models (LLMs).
+An advanced Generative AI-driven Applicant Tracking System (ATS) built with Python, Streamlit, and Google Gemini AI. This application evaluates resumes against specific Job Descriptions, calculates a match score, identifies missing keywords, and provides comprehensive HR-level feedback using Large Language Models (LLMs).
 
 🔗 **Live Demo:** https://ai-resume-screener-ats.streamlit.app/
 
