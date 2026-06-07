@@ -75,16 +75,26 @@ def generate_cover_letter(resume_text, jd_text, model):
     JD: {jd_text}\nResume: {resume_text}\nKeep it under 400 words."""
     return model.generate_content(prompt).text
 
-# নতুন ফাংশন: Job URL Scraping
+# আপডেট করা ফাংশন: Job URL Scraping (With Anti-Bot Detection)
 def scrape_job_description(url):
     try:
-        headers = {'User-Agent': 'Mozilla/5.0'} 
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept-Language': 'en-US,en;q=0.9'
+        } 
         response = requests.get(url, headers=headers, timeout=10)
         soup = BeautifulSoup(response.text, 'html.parser')
-        # অপ্রয়োজনীয় স্ক্রিপ্ট ও স্টাইল বাদ দেওয়া
+        
         for script in soup(["script", "style"]):
             script.extract()
         text = soup.get_text(separator=' ', strip=True)
+        
+        # অ্যান্টি-বট সিকিউরিটি চেক
+        bot_keywords = ["JavaScript is disabled", "Client Challenge", "Enable JavaScript", "Security check", "prove you are a human"]
+        for keyword in bot_keywords:
+            if keyword.lower() in text.lower():
+                return "BLOCKED"
+                
         return text
     except Exception as e:
         return ""
@@ -107,11 +117,14 @@ with tab1:
             if st.button("Fetch Job Details"):
                 with st.spinner("Scraping job details..."):
                     scraped_text = scrape_job_description(job_url)
-                    if scraped_text:
+                    
+                    if scraped_text == "BLOCKED":
+                        st.error("🔒 Anti-Bot Protection Detected! This website (like LinkedIn/Indeed) blocks automated scanners. Please copy and paste the Job Description text manually.")
+                    elif scraped_text:
                         st.success("Successfully fetched job details!")
                         jd_input = st.text_area("Review Fetched JD:", value=scraped_text[:2000] + "... (truncated)", height=150, key="jd_scraped_input")
                     else:
-                        st.error("Could not read URL. Some sites (like LinkedIn) block bots. Please paste text instead.")
+                        st.error("Could not read URL. Please check the link or paste the text manually.")
                         
     with col2:
         st.subheader("📂 Upload Resume")
@@ -195,16 +208,13 @@ with tab3:
     st.write("Ask any questions about your resume and how it fits the Job Description!")
     
     if 'resume_text' in st.session_state and 'jd_input' in st.session_state:
-        # চ্যাট হিস্ট্রি সেটআপ
         if "messages" not in st.session_state:
             st.session_state.messages = [{"role": "assistant", "content": "Hello! I have reviewed your CV. What would you like to know?"}]
 
-        # আগের চ্যাটগুলো দেখানো
         for message in st.session_state.messages:
             with st.chat_message(message["role"]):
                 st.markdown(message["content"])
 
-        # ইউজারের ইনপুট
         if prompt := st.chat_input("E.g., How can I improve my experience section?"):
             st.session_state.messages.append({"role": "user", "content": prompt})
             with st.chat_message("user"):
@@ -218,6 +228,6 @@ with tab3:
                         st.markdown(response.text)
                         st.session_state.messages.append({"role": "assistant", "content": response.text})
                     except:
-                        st.error("AI is currently busy. Please wait a moment and try again.")
+                        st.error("Server is currently busy. Please wait a moment and try again.")
     else:
         st.warning("⚠️ Please analyze a resume in the 'Single CV Analyzer' tab first so I can read it!")
