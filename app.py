@@ -10,7 +10,7 @@ import time
 st.set_page_config(page_title="AI Resume Screener", page_icon="📄", layout="wide")
 
 st.title("📄 AI Resume Screener & Smart Feedback System")
-st.write("Upload your resume, paste the Job Description, and get detailed AI feedback powered by Gemini!")
+st.write("Upload your resume, paste the Job Description, and get detailed feedback!")
 st.write("---")
 
 # Streamlit Secrets থেকে স্বয়ংক্রিয়ভাবে API Key নেওয়ার চেষ্টা
@@ -95,7 +95,7 @@ if st.button("Analyze Resume with AI 🚀"):
         if not api_key:
             st.error("⚠️ Please enter your Gemini API Key in the sidebar first!")
         else:
-            with st.spinner("Analyzing your resume and generating AI feedback..."):
+            with st.spinner("Analyzing your resume and generating feedback..."):
                 resume_text = extract_text_from_pdf(uploaded_file)
                 match_score = calculate_match_score(resume_text, jd_input)
                 missing_keywords = get_missing_keywords(resume_text, jd_input)
@@ -123,16 +123,16 @@ if st.button("Analyze Resume with AI 🚀"):
                 st.write("---")
                 
                 # জেমিনাই এআই এর ফিডব্যাক
-                st.header("🤖 Advanced AI Feedback (HR Review)")
+                st.header("🤖 Advanced Feedback (HR Review)")
                 try:
                     # যদি API ঠিক থাকে, তবে রেজাল্ট দেখাবে
                     ai_feedback = get_ai_feedback(resume_text, jd_input, api_key)
                     st.write(ai_feedback)
                 except Exception as e:
                     # যদি API লিমিট শেষ হয়ে যায়, তবে স্মার্ট মেসেজ দেখাবে
-                    st.info("📌 The AI server is currently experiencing high traffic or the free API limit has been reached. Don't worry! Your ATS Score and Missing Keywords above are 100% accurate. Please try the AI review feature again a little later.")
+                    st.info("📌 The server is currently experiencing high traffic or the free API limit has been reached. Don't worry! Your ATS Score and Missing Keywords above are 100% accurate. Please try the review feature again a little later.")
     else:
         st.error("Please upload a PDF resume and paste the Job Description to proceed.")
 
 st.write("---")
-st.caption("🚀 AI-Powered ATS Analyzer | Built by You 💡")
+st.caption("Developed by Rubina Begum")
