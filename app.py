@@ -90,7 +90,7 @@ with col2:
     st.subheader("📂 Upload Resume")
     uploaded_file = st.file_uploader("Upload your CV (PDF format only)", type=["pdf"])
 
-if st.button("Analyze Resume with AI 🚀"):
+if st.button("Analyze Resume"):
     if uploaded_file is not None and jd_input.strip() != "":
         if not api_key:
             st.error("⚠️ Please enter your Gemini API Key in the sidebar first!")
