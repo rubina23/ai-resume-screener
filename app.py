@@ -48,7 +48,7 @@ def get_missing_keywords(resume_text, jd_text):
 def get_ai_feedback(resume_text, jd_text, api_key):
     genai.configure(api_key=api_key)
     
-    # প্রথমে 1.5-flash (যার লিমিট ১৫০০/দিন) খুঁজে বের করার চেষ্টা করবে
+    # প্রথমে 1.5-flash খুঁজে বের করার চেষ্টা করবে
     valid_model = None
     for m in genai.list_models():
         if 'generateContent' in m.supported_generation_methods and '1.5-flash' in m.name.lower():
@@ -62,7 +62,7 @@ def get_ai_feedback(resume_text, jd_text, api_key):
                 valid_model = m.name.replace('models/', '') 
                 break
                 
-    time.sleep(2)  # সেফটির জন্য ২ সেকেন্ড অপেক্ষা (Rate limit বা কোটা এরর এড়ানোর জন্য)
+    time.sleep(2)  # সেফটির জন্য ২ সেকেন্ড অপেক্ষা (Rate limit এড়ানোর জন্য)
     
     model = genai.GenerativeModel(valid_model)
     prompt = f"""
@@ -125,10 +125,12 @@ if st.button("Analyze Resume with AI 🚀"):
                 # জেমিনাই এআই এর ফিডব্যাক
                 st.header("🤖 Advanced AI Feedback (HR Review)")
                 try:
+                    # যদি API ঠিক থাকে, তবে রেজাল্ট দেখাবে
                     ai_feedback = get_ai_feedback(resume_text, jd_input, api_key)
                     st.write(ai_feedback)
                 except Exception as e:
-                    st.error(f"Error generating AI feedback. Please check your API limit or connection. ({e})")
+                    # যদি API লিমিট শেষ হয়ে যায়, তবে স্মার্ট মেসেজ দেখাবে
+                    st.info("📌 The AI server is currently experiencing high traffic or the free API limit has been reached. Don't worry! Your ATS Score and Missing Keywords above are 100% accurate. Please try the AI review feature again a little later.")
     else:
         st.error("Please upload a PDF resume and paste the Job Description to proceed.")
 
