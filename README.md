@@ -1,30 +1,27 @@
-# 📄 AI Resume Screener (ATS System)
+# 📄 AI-Driven Resume Screener & Smart Feedback System (ATS System) 
 
 ![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)
 ![Streamlit](https://img.shields.io/badge/Streamlit-App-FF4B4B.svg)
 ![Machine Learning](https://img.shields.io/badge/Machine%20Learning-Scikit--Learn-F9AB00.svg)
 
-An AI-powered Applicant Tracking System (ATS) built with **Streamlit**, **Scikit-Learn**, and **Python**. This smart web application helps job seekers and recruiters evaluate how well a resume matches a specific Job Description (JD) using Natural Language Processing (NLP).
+An advanced Generative AI-backed Applicant Tracking System (ATS) built with Python, Streamlit, and Google Gemini AI. This application evaluates resumes against specific Job Descriptions, calculates a match score, identifies missing keywords, and provides comprehensive HR-level feedback using Large Language Models (LLMs).
 
 🔗 **Live Demo:** https://ai-resume-screener-ats.streamlit.app/
 
----
-
-## 🚀 Key Features
-
-* **PDF Resume Parsing:** Seamlessly upload your CV/Resume in PDF format. The app instantly extracts and processes the text.
-* **Smart ATS Matching:** Uses NLP techniques (TF-IDF Vectorization & Cosine Similarity) to mathematically compare the resume against the targeted Job Description.
-* **ATS Match Score:** Instantly calculates a percentage score indicating how well your resume fits the job role.
-* **Skill Gap Analysis:** Automatically identifies critical keywords and skills present in the Job Description but missing from your resume, providing actionable insights for optimization.
+## 🚀 Features
+* **Resume Parsing:** Extracts text directly from uploaded PDF resumes.
+* **Smart ATS Scoring:** Uses NLP techniques (TF-IDF & Cosine Similarity) to calculate a precise matching percentage.
+* **Keyword Gap Analysis:** Automatically identifies critical keywords and skills present in the Job Description but missing from your resume, providing actionable insights for optimization.
+* **Advanced AI HR Review:** Integrates Google Gemini AI (`gemini-1.5-flash`) to generate detailed qualitative feedback, including candidate strengths, weaknesses, and actionable improvement tips.
 
 ---
 
 ## 🛠️ Technology Stack
 
-* **Frontend & Framework:** Streamlit
-* **Text Extraction:** PyPDF2
-* **Machine Learning & NLP:** Scikit-Learn (TF-IDF, Cosine Similarity)
 * **Language:** Python
+* **Frontend & Framework:** Streamlit
+* **Machine Learning / NLP:** Scikit-Learn, PyPDF2
+* **Generative AI:** Google Gemini API (`google-generativeai`)
 
 ---
 
