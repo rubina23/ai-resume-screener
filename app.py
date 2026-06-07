@@ -13,9 +13,17 @@ st.write("Upload your resume, paste the Job Description, and get detailed AI fee
 st.write("---")
 
 # সাইডবারে API Key নেওয়ার অপশন
-st.sidebar.title("🔑 API Key Setup")
-api_key = st.sidebar.text_input("Enter your Google Gemini API Key:", type="password")
-st.sidebar.markdown("[Get your free API key here](https://aistudio.google.com/app/apikey)")
+#st.sidebar.title("🔑 API Key Setup")
+#api_key = st.sidebar.text_input("Enter your Google Gemini API Key:", type="password")
+#st.sidebar.markdown("[Get your free API key here](https://aistudio.google.com/app/apikey)")
+
+# Streamlit Secrets থেকে স্বয়ংক্রিয়ভাবে API Key নেওয়া
+try:
+    api_key = st.secrets["GEMINI_API_KEY"]
+except:
+    st.sidebar.title("🔑 API Key Setup")
+    api_key = st.sidebar.text_input("Enter your Google Gemini API Key:", type="password")
+    st.sidebar.markdown("[Get your free API key here](https://aistudio.google.com/app/apikey)")
 
 # ফাংশন: পিডিএফ থেকে টেক্সট পড়া
 def extract_text_from_pdf(uploaded_file):
