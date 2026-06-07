@@ -49,24 +49,27 @@ def get_missing_keywords(resume_text, jd_text):
     return list(missing)
 
 # ফাংশন: Gemini AI দিয়ে ডিটেইলস ফিডব্যাক জেনারেট করা
-def get_ai_feedback(resume_text, jd_text, api_key):
-    genai.configure(api_key=api_key)
-    # ফাংশন: Gemini AI দিয়ে ডিটেইলস ফিডব্যাক জেনারেট করা
+# ফাংশন: Gemini AI দিয়ে ডিটেইলস ফিডব্যাক জেনারেট করা
 def get_ai_feedback(resume_text, jd_text, api_key):
     genai.configure(api_key=api_key)
     
-    # স্বয়ংক্রিয়ভাবে অ্যাকটিভ মডেল খুঁজে বের করা
+    # প্রথমে 1.5-flash (যার লিমিট ১৫০০/দিন) খুঁজে বের করার চেষ্টা করবে
     valid_model = None
     for m in genai.list_models():
-        if 'generateContent' in m.supported_generation_methods and 'gemini' in m.name.lower():
-            # 'models/' অংশটুকু বাদ দিয়ে শুধু নাম নেওয়া
+        if 'generateContent' in m.supported_generation_methods and '1.5-flash' in m.name.lower():
             valid_model = m.name.replace('models/', '') 
             break
             
+    # যদি কোনো কারণে 1.5-flash না পায়, তবে অন্য যেকোনো এভেইলেবল মডেল নিবে
     if not valid_model:
-        return "Error: No supported Gemini model found for your API key."
-        
-    # খুঁজে পাওয়া মডেলটি ব্যবহার করা
+        for m in genai.list_models():
+            if 'generateContent' in m.supported_generation_methods and 'gemini' in m.name.lower():
+                valid_model = m.name.replace('models/', '') 
+                break
+                
+    import time
+    time.sleep(2)  # সেফটির জন্য ২ সেকেন্ড অপেক্ষা
+    
     model = genai.GenerativeModel(valid_model)
     prompt = f"""
     Act as an expert HR Manager and ATS specialist. Review the following Resume against the Job Description.
