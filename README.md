@@ -6,7 +6,7 @@
 
 An enterprise-grade Applicant Tracking System (ATS) and Career Assistant built with Python, Streamlit, and Google Gemini AI. This application not only scores resumes against Job Descriptions but also features an interactive RAG-based chatbot, batch ranking for HRs, and automated web scraping.
 
-🔗 **Live Demo:** https://ai-resume-screener-ats.streamlit.app/
+🔗 **Live:** https://ai-resume-screener-ats.streamlit.app/
 
 ## 🚀 Features
 * **Smart CV Analysis:** Calculates ATS match scores using TF-IDF & Cosine Similarity.
