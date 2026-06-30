@@ -13,8 +13,8 @@ from bs4 import BeautifulSoup
 # web settings
 st.set_page_config(page_title="AI Resume Screener", page_icon="📄", layout="wide")
 
-st.title("📄 AI-Driven Resume Screener & ATS System")
-st.write("Instantly analyze resumes, generate tailored cover letters, and rank top candidates with AI-driven precision!")
+st.title("📄 TalentSync: Intelligent ATS & Career Assistant")
+st.write("Empowering recruiters and job seekers with NLP-driven resume screening, real-time job matching, and RAG-based AI feedback.")
 st.write("---")
 
 # Streamlit Secrets theke API Key neya
