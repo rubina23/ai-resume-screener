@@ -1,4 +1,4 @@
-# 📄 AI-Driven Resume Screener & ATS System
+# 📄 TalentSync: Intelligent ATS & Career Assistant
 
 ![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)
 ![Streamlit](https://img.shields.io/badge/Streamlit-App-FF4B4B.svg)
