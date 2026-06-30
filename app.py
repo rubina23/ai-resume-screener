@@ -10,21 +10,21 @@ import time
 import requests
 from bs4 import BeautifulSoup
 
-# ওয়েবসাইটের সেটিং
+# web settings
 st.set_page_config(page_title="AI Resume Screener", page_icon="📄", layout="wide")
 
 st.title("📄 AI-Driven Resume Screener & ATS System")
 st.write("Instantly analyze resumes, generate tailored cover letters, and rank top candidates with AI-driven precision!")
 st.write("---")
 
-# Streamlit Secrets থেকে API Key নেওয়া
+# Streamlit Secrets theke API Key neya
 try:
     api_key = st.secrets["GEMINI_API_KEY"]
 except:
     st.sidebar.title("🔑 API Key Setup")
     api_key = st.sidebar.text_input("Enter your Google Gemini API Key:", type="password")
 
-# --- ফাংশনগুলো ---
+# functions
 def extract_text_from_file(uploaded_file):
     text = ""
     if uploaded_file.name.endswith('.pdf'):
@@ -75,7 +75,7 @@ def generate_cover_letter(resume_text, jd_text, model):
     JD: {jd_text}\nResume: {resume_text}\nKeep it under 400 words."""
     return model.generate_content(prompt).text
 
-# আপডেট করা ফাংশন: Job URL Scraping (With Anti-Bot Detection)
+# Updated function: Job URL Scraping (With Anti-Bot Detection)
 def scrape_job_description(url):
     try:
         headers = {
@@ -89,7 +89,7 @@ def scrape_job_description(url):
             script.extract()
         text = soup.get_text(separator=' ', strip=True)
         
-        # অ্যান্টি-বট সিকিউরিটি চেক
+        # antiboat security check 
         bot_keywords = ["JavaScript is disabled", "Client Challenge", "Enable JavaScript", "Security check", "prove you are a human"]
         for keyword in bot_keywords:
             if keyword.lower() in text.lower():
@@ -99,7 +99,7 @@ def scrape_job_description(url):
     except Exception as e:
         return ""
 
-# --- ইউজার ইন্টারফেস (UI) - Tab System ---
+# (UI) - Tab System ---
 tab1, tab2, tab3 = st.tabs(["👤 Single CV Analyzer", "🏆 Batch CV Ranking", "💬 Interactive AI Chat"])
 
 # ----------------- TAB 1: Single CV Analysis -----------------
